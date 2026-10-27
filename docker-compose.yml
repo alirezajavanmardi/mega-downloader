@@ -1,0 +1,21 @@
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Server settings (override anything in .env that only makes sense on a desktop)
+      YTDLP_COOKIES: /app/cookies.txt
+      YTDLP_COOKIES_FROM_BROWSER: ""
+      YTDLP_POT_BASE_URL: http://pot:4416
+    volumes:
+      # The file must exist on the host BEFORE you start, or Docker creates a directory instead.
+      - ./cookies.txt:/app/cookies.txt:ro
+    depends_on:
+      - pot
+
+  # Generates YouTube "proof of origin" tokens for yt-dlp. Not published to the host: only the bot can reach it.
+  pot:
+    image: brainicism/bgutil-ytdlp-pot-provider
+    restart: unless-stopped
+    init: true
